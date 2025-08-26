@@ -1,12 +1,16 @@
 FROM mambaorg/micromamba:1.5.8
-WORKDIR /usr/local/app
 
-# copy env first to leverage build cache
-COPY environment.yml /tmp/environment.yml
-RUN micromamba install -y -n base -f /tmp/environment.yml && \
+# Use the recommended pattern: copy env first (cache-friendly) and own it
+COPY --chown=$MAMBA_USER:$MAMBA_USER environment.yml /tmp/environment.yml
+
+# Create the env (not "install into base"); clean afterwards
+RUN micromamba env create -y -f /tmp/environment.yml && \
     micromamba clean -a -y
 
-# (optional) make conda available in non-login shells
+# Make the env active for subsequent RUN/CMD without needing 'conda activate'
+ENV MAMBA_DOCKERFILE_ACTIVATE=1
 SHELL ["/bin/bash", "-lc"]
+ENV PATH=/opt/conda/envs/s5p/bin:$PATH
 
+WORKDIR /usr/local/app
 COPY . .
