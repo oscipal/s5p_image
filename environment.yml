@@ -21,3 +21,6 @@ dependencies:
   - pyproj>=3.6
   - ipympl
   - esda
+  - pip                    
+  - pip:
+      - cdsetool
